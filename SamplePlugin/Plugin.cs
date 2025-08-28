@@ -48,43 +48,55 @@ public sealed unsafe class Plugin : IDalamudPlugin
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6641"),
                 "Test 1",
                 "Test 1 Description",
-                1,
                 Keybind.FromKeyboard(KeyboardModifierFlags.Control | KeyboardModifierFlags.Alt, SeVirtualKey.NUMPAD2)));
         this.RegisterEvents(
             this.manager.AddCommand(
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6642"),
                 "Test 2",
                 "Test 2 Description",
-                1,
                 Keybind.FromKeyboard(KeyboardModifierFlags.Control, SeVirtualKey.NUMPAD2)));
         this.RegisterEvents(
             this.manager.AddCommand(
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6643"),
                 "Test 3",
                 "Test 3 Description",
-                1,
                 Keybind.FromKeyboard(KeyboardModifierFlags.Alt, SeVirtualKey.NUMPAD2)));
         this.RegisterEvents(
             this.manager.AddCommand(
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6644"),
                 "C-R, R",
                 null,
-                1,
                 Keybind.FromKeyboard(KeyboardModifierFlags.Control, SeVirtualKey.R, SeVirtualKey.R)));
         this.RegisterEvents(
             this.manager.AddCommand(
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6645"),
                 "C-R, X",
                 null,
-                1,
                 Keybind.FromKeyboard(KeyboardModifierFlags.Control, SeVirtualKey.R, SeVirtualKey.X)));
         this.RegisterEvents(
             this.manager.AddCommand(
                 new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6646"),
-                "C-S-D, K",
+                "Dalamud Settings?",
                 null,
-                1,
-                Keybind.FromKeyboard(KeyboardModifierFlags.Control | KeyboardModifierFlags.Shift, SeVirtualKey.D, SeVirtualKey.K)));
+                Keybind.FromKeyboard(KeyboardModifierFlags.Control | KeyboardModifierFlags.Shift, SeVirtualKey.D, SeVirtualKey.K),
+                Keybind.FromGamepad(GamepadModifierFlags.Start, SeVirtualKey.PAD_UP, SeVirtualKey.PAD_DOWN),
+                Keybind.FromGamepad(GamepadModifierFlags.Select, SeVirtualKey.PAD_Y, SeVirtualKey.PAD_A)));
+        this.RegisterEvents(
+            this.manager.AddCommand(
+                new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6647"),
+                "Inspect Addon?",
+                null,
+                Keybind.FromKeyboard(KeyboardModifierFlags.Control | KeyboardModifierFlags.Shift, SeVirtualKey.D, SeVirtualKey.PAD_LMB)));
+        this.RegisterEvents(
+            this.manager.AddCommand(
+                new("c31f9869-3b3e-4c5c-a1a8-fcbf704a6648"),
+                "???",
+                null,
+                Keybind.FromGamepad(
+                    GamepadModifierFlags.None,
+                    SeVirtualKey.PAD_UP, SeVirtualKey.PAD_UP, SeVirtualKey.PAD_DOWN, SeVirtualKey.PAD_DOWN,
+                    SeVirtualKey.PAD_LEFT, SeVirtualKey.PAD_RIGHT, SeVirtualKey.PAD_LEFT, SeVirtualKey.PAD_RIGHT,
+                    SeVirtualKey.PAD_B, SeVirtualKey.PAD_A)));
     }
 
     public void Dispose()
@@ -159,12 +171,6 @@ public sealed unsafe class Plugin : IDalamudPlugin
 
                     ImGui.TableNextColumn();
                     ImGui.Text(command.Priority.ToString());
-                    if (!command.UseDefaultPriority)
-                    {
-                        ImGui.SameLine();
-                        if (ImGuiComponents.IconButton("##priorityRestore", FontAwesomeIcon.Undo))
-                            command.CustomPriority = null;
-                    }
 
                     ImGui.TableNextColumn();
                     for (var j = 0; j < command.Keybinds.Count; j++)

@@ -11,6 +11,6 @@ public enum GamepadModifierFlags : byte
     RightTrigger = 1 << 1,
     LeftBumper = 1 << 2,
     RightBumper = 1 << 3,
-    Select = 1 << 6,
-    Start = 1 << 7,
+    Start = 1 << 6,
+    Select = 1 << 7,
 }

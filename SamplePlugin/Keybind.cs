@@ -1,14 +1,16 @@
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using FFXIVClientStructs.FFXIV.Client.System.Input;
 
 namespace SamplePlugin;
 
-[StructLayout(LayoutKind.Explicit, Size = 4)]
+[StructLayout(LayoutKind.Explicit, Size = 16)]
 public unsafe struct Keybind : IEquatable<Keybind>
 {
-    public const int MaxKeySequenceLength = 3;
+    public const int MaxKeySequenceLength = 15;
 
     // Valid only if Key < 0xA0
     [FieldOffset(0)]
@@ -26,11 +28,16 @@ public unsafe struct Keybind : IEquatable<Keybind>
     public fixed byte KeySequenceBuffer[MaxKeySequenceLength];
 
     [FieldOffset(0)]
-    private int Value;
+    private int Value32;
+
+    [FieldOffset(0)]
+    private int Value8;
 
     public readonly ReadOnlySpan<SeVirtualKey> KeySequence =>
         MemoryMarshal.Cast<byte, SeVirtualKey>(
             MemoryMarshal.CreateReadOnlySpan(in this.KeySequenceBuffer[0], MaxKeySequenceLength).TrimEnd((byte)0));
+
+    public readonly byte ModifierLength => (byte)BitOperations.PopCount((uint)this.Value8);
 
     public readonly bool IsEmpty => this.KeySequenceBuffer[0] == 0;
 
@@ -52,7 +59,7 @@ public unsafe struct Keybind : IEquatable<Keybind>
         var res = new Keybind {KeyboardModifiers = modifiers};
         for (var i = 0; i < keySequence.Length; i++)
         {
-            if (keySequence[i] is <= SeVirtualKey.NO_KEY or >= SeVirtualKey.PAD_LMB)
+            if (keySequence[i] is <= SeVirtualKey.NO_KEY or >= SeVirtualKey.PAD_MB7)
                 throw new ArgumentException($"{keySequence[i]} is not allowed.");
             res.KeySequenceBuffer[i] = (byte)keySequence[i];
         }
@@ -60,11 +67,27 @@ public unsafe struct Keybind : IEquatable<Keybind>
         return res;
     }
 
-    public readonly bool Equals(Keybind other) => this.Value == other.Value;
+    public static Keybind FromGamepad(GamepadModifierFlags modifiers, params ReadOnlySpan<SeVirtualKey> keySequence)
+    {
+        if (keySequence.Length is 0 or > MaxKeySequenceLength)
+            throw new ArgumentException($"Up to {MaxKeySequenceLength} keys are allowed.");
+
+        var res = new Keybind {GamepadModifiers = modifiers};
+        for (var i = 0; i < keySequence.Length; i++)
+        {
+            if (keySequence[i] is < SeVirtualKey.PAD_UP or > SeVirtualKey.PAD_Start)
+                throw new ArgumentException($"{keySequence[i]} is not allowed.");
+            res.KeySequenceBuffer[i] = (byte)keySequence[i];
+        }
+
+        return res;
+    }
+
+    public readonly bool Equals(Keybind other) => this.Value32 == other.Value32;
 
     public override readonly bool Equals(object? obj) => obj is Keybind other && this.Equals(other);
 
-    public override readonly int GetHashCode() => this.Value;
+    public override readonly int GetHashCode() => this.Value32;
 
     public override readonly string ToString() =>
         this.KeySequenceBuffer[0] == 0

@@ -29,9 +29,7 @@ public interface IKeybindCommand
     // Non-negative: take priority over the game's default handler; make corresponding `IsInputId...` return false
     // Negative: do not handle if the game already has a corresponding keybind
     // NOTE: Longer modifier keys always have higher priority; "Ctrl+S" and "S" will only trigger "Ctrl+S", including Down event
-    bool UseDefaultPriority { get; }
     int Priority { get; }
-    int DefaultPriority { get; }
 
     bool UseDefaultKeybinds { get; }
     IEnumerable<Keybind> Keybinds { get; }
@@ -58,13 +56,7 @@ public class KeybindCommand : IKeybindCommand
 
     public string? Description { get; set; }
 
-    public bool UseDefaultPriority => this.CustomPriority is null;
-
-    public int Priority => this.CustomPriority ?? this.DefaultPriority;
-
-    public int? CustomPriority { get; set; }
-
-    public int DefaultPriority { get; set; }
+    public int Priority { get; set; }
 
     public bool UseDefaultKeybinds => this.CustomKeybinds is null;
 
